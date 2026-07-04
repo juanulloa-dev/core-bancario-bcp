@@ -1,20 +1,41 @@
 const pagosModel = require("../models/pagosModel");
-const transferenciasModel = require("../models/transferenciasModel");
+const txModel = require("../models/transferenciasModel");
 const pagosController = {
-  pagarServicios: async (req, res) => {
+  pagoServiciosPublicos: async (req, res) => {
     try {
-      const { idServicio, cuentaId } = req.body;
-      const servicio = await pagosModel.obtenerDeudaServicio(idServicio);
-      if (!servicio) return res.status(404).json({ mensaje: "No hay deuda." });
-      await transferenciasModel.descontarSaldo(cuentaId, servicio.monto_deuda);
-      res.status(200).json({ exito: true, empresa: servicio.empresa, totalPagado: parseFloat(servicio.monto_deuda) });
-    } catch (error) { res.status(500).json({ error: error.message }); }
+      const { idEmpresa, cuentaId } = req.body;
+      const empresa = await pagosModel.consultarEmpresa(idEmpresa);
+      if (!empresa || empresa.monto_deuda <= 0) return res.status(400).json({ msg: "No registra deudas pendientes" });
+      await txModel.verificarYDescontar(cuentaId, empresa.monto_deuda);
+      await pagosModel.liquidarDeudaEmpresa(idEmpresa);
+      const v = await txModel.registrarComprobante(cuentaId, idEmpresa, "PAGO_SERVICIO", empresa.monto_deuda, `Pago de recibo ${empresa.nombre_empresa}`);
+      res.status(200).json({ status: "RECIBO_PAGADO", empresa: empresa.nombre_empresa, total: empresa.monto_deuda, comprobante: v });
+    } catch (e) { res.status(400).json({ error: e.message }); }
   },
-  cuotificarCompras: async (req, res) => {
+  recargasCelularOperadoras: async (req, res) => {
     try {
-      await pagosModel.actualizarEstadoCompra(req.body.idCompra, `FRACCIONADO_MESES`);
-      res.status(200).json({ exito: true });
-    } catch (error) { res.status(500).json({ error: error.message }); }
+      const { cuentaId, operadoraId, numeroCelular, monto } = req.body;
+      await txModel.verificarYDescontar(cuentaId, monto);
+      const v = await txModel.registrarComprobante(cuentaId, operadoraId, "RECARGA", monto, `Recarga de saldo al numero ${numeroCelular}`);
+      res.status(200).json({ status: "RECARGA_EXITOSA", numero: numeroCelular, montoRecargado: monto, comprobante: v });
+    } catch (e) { res.status(400).json({ error: e.message }); }
+  },
+  pagoTarjetaCreditoBCP: async (req, res) => {
+    try {
+      const { cuentaId, idTarjeta, montoAPagar } = req.body; // Pago Minimo, Total o Parcial
+      await txModel.verificarYDescontar(cuentaId, montoAPagar);
+      await pagosModel.descontarDeudaTarjeta(idTarjeta, montoAPagar);
+      const v = await txModel.registrarComprobante(cuentaId, idTarjeta, "PAGO_TARJETA", montoAPagar, "Abono directo a deuda de Tarjeta de Credito BCP");
+      res.status(200).json({ status: "TARJETA_PAGADA_EXITO", comprobante: v });
+    } catch (e) { res.status(400).json({ error: e.message }); }
+  },
+  pagoTarjetaOtrosBancos: async (req, res) => {
+    try {
+      const { cuentaId, numeroTarjetaDestino, bancoDestino, monto } = req.body;
+      await txModel.verificarYDescontar(cuentaId, monto);
+      const v = await txModel.registrarComprobante(cuentaId, numeroTarjetaDestino, "PAGO_TARJETA_OTROS", monto, `Pago de tarjeta interbancaria hacia ${bancoDestino}`);
+      res.status(200).json({ status: "TRANSMISION_CCE_OK", mensaje: "El abono se reflejará en el banco destino en el lapso del horario seleccionado", comprobante: v });
+    } catch (e) { res.status(400).json({ error: e.message }); }
   }
 };
 module.exports = pagosController;

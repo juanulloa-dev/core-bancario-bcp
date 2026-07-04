@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-07-2026 a las 20:42:32
+-- Tiempo de generación: 04-07-2026 a las 05:08:17
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -24,59 +24,16 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `auditoria_accesos`
---
-
-CREATE TABLE `auditoria_accesos` (
-  `id_auditoria` int(11) NOT NULL,
-  `username` varchar(100) NOT NULL,
-  `accion` varchar(100) NOT NULL,
-  `fecha_evento` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `auditoria_accesos`
---
-
-INSERT INTO `auditoria_accesos` (`id_auditoria`, `username`, `accion`, `fecha_evento`) VALUES
-(1, '72345678', 'LOGIN_EXITOSO', '2026-07-03 13:41:07');
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `compras_tarjeta`
---
-
-CREATE TABLE `compras_tarjeta` (
-  `id_compra` varchar(50) NOT NULL,
-  `tarjeta_id` varchar(50) DEFAULT NULL,
-  `establecimiento` varchar(100) NOT NULL,
-  `monto_total` decimal(10,2) NOT NULL,
-  `fecha_transaccion` date NOT NULL,
-  `estado` varchar(50) DEFAULT 'ROTATIVO'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `compras_tarjeta`
---
-
-INSERT INTO `compras_tarjeta` (`id_compra`, `tarjeta_id`, `establecimiento`, `monto_total`, `fecha_transaccion`, `estado`) VALUES
-('TX-COMPRA-01', '4551-2300-0010-1111', 'IAG SHOP PERU (Sillas Gamer)', 1200.00, '2026-06-15', 'ROTATIVO'),
-('TX-COMPRA-02', '4551-2300-0010-1111', 'SAGA FALABELLA JOCKEY', 450.00, '2026-06-22', 'ROTATIVO'),
-('TX-COMPRA-03', '4557-8812-3394-3920', 'APPLE STORE ONLINE', 4999.00, '2026-06-29', 'ROTATIVO');
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `cuentas`
 --
 
 CREATE TABLE `cuentas` (
-  `id` varchar(50) NOT NULL,
-  `tipo_cuenta` varchar(100) NOT NULL,
+  `id` varchar(20) NOT NULL,
+  `dni_titular` varchar(8) DEFAULT NULL,
+  `tipo_cuenta` varchar(50) NOT NULL,
   `saldo_disponible` decimal(12,2) NOT NULL,
   `saldo_wawaditos` decimal(12,2) DEFAULT 0.00,
-  `moneda` varchar(5) DEFAULT 'PEN',
+  `cci` varchar(24) NOT NULL,
   `estado` varchar(20) DEFAULT 'ACTIVO'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -84,59 +41,89 @@ CREATE TABLE `cuentas` (
 -- Volcado de datos para la tabla `cuentas`
 --
 
-INSERT INTO `cuentas` (`id`, `tipo_cuenta`, `saldo_disponible`, `saldo_wawaditos`, `moneda`, `estado`) VALUES
-('CTA-101', 'CUENTA SUELDO BCP', 8400.00, 200.00, 'PEN', 'ACTIVO'),
-('CTA-102', 'CUENTA DE AHORROS SOL DE ORO', 15750.50, 600.00, 'PEN', 'ACTIVO'),
-('CTA-103', 'CUENTA CORRIENTE JURIDICA', 980.00, 0.00, 'PEN', 'ACTIVO'),
-('CTA-999', 'CUENTA DESTINO TERCEROS CCE', 120.00, 0.00, 'PEN', 'ACTIVO');
+INSERT INTO `cuentas` (`id`, `dni_titular`, `tipo_cuenta`, `saldo_disponible`, `saldo_wawaditos`, `cci`, `estado`) VALUES
+('191-72345-0-01', '72345678', 'SUELDO', 5400.00, 200.00, 'CCI-002-191-0072345001-9', 'ACTIVO'),
+('191-72345-1-02', '72345678', 'AH_DOL', 1200.00, 0.00, 'CCI-002-191-0072345102-4', 'ACTIVO');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `historial_movimientos`
+-- Estructura de tabla para la tabla `empresas_afiliadas`
 --
 
-CREATE TABLE `historial_movimientos` (
-  `id_movimiento` int(11) NOT NULL,
-  `cuenta_id` varchar(50) DEFAULT NULL,
-  `detalle` varchar(100) NOT NULL,
-  `monto` decimal(10,2) NOT NULL,
+CREATE TABLE `empresas_afiliadas` (
+  `id_empresa` varchar(30) NOT NULL,
+  `nombre_empresa` varchar(100) NOT NULL,
+  `categoria` varchar(50) NOT NULL,
+  `codigo_recaudacion` varchar(50) NOT NULL,
+  `monto_deuda` decimal(10,2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `empresas_afiliadas`
+--
+
+INSERT INTO `empresas_afiliadas` (`id_empresa`, `nombre_empresa`, `categoria`, `codigo_recaudacion`, `monto_deuda`) VALUES
+('REC-MOVISTAR', 'Movistar Recargas', 'RECARGAS', '999888777', 0.00),
+('SERV-LUZ-LDS', 'Luz del Sur', 'LUZ', '1029384', 156.40),
+('SERV-UNI-UTP', 'Universidad Tecnologica del Peru', 'EDUCACION', 'U20261011', 890.00);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `historial_transacciones`
+--
+
+CREATE TABLE `historial_transacciones` (
+  `id_tx` int(11) NOT NULL,
+  `cuenta_origen` varchar(50) DEFAULT NULL,
+  `cuenta_destino` varchar(50) DEFAULT NULL,
+  `tipo_operacion` varchar(50) DEFAULT NULL,
+  `monto` decimal(12,2) NOT NULL,
+  `moneda` varchar(3) DEFAULT 'PEN',
+  `detalle` varchar(150) DEFAULT NULL,
+  `comprobante_id` varchar(20) DEFAULT NULL,
   `fecha_registro` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `historial_movimientos`
+-- Volcado de datos para la tabla `historial_transacciones`
 --
 
-INSERT INTO `historial_movimientos` (`id_movimiento`, `cuenta_id`, `detalle`, `monto`, `fecha_registro`) VALUES
-(1, 'CTA-101', 'RETIRO EN EFECTIVO CAJERO SJM', -200.00, '2026-07-03 13:38:08'),
-(2, 'CTA-101', 'YAPE RECIBIDO DE CARLOS MENDOZA', 45.00, '2026-07-03 13:38:08'),
-(3, 'CTA-101', 'ABONO REMUNERACION EMPRESA SAC', 5000.00, '2026-07-03 13:38:08'),
-(4, 'CTA-102', 'TRANSFERENCIA INTERBANCARIA RECIBIDA', 15000.00, '2026-07-03 13:38:08');
+INSERT INTO `historial_transacciones` (`id_tx`, `cuenta_origen`, `cuenta_destino`, `tipo_operacion`, `monto`, `moneda`, `detalle`, `comprobante_id`, `fecha_registro`) VALUES
+(1, '191-72345-0-01', 'RESTAURANTE-SABORES', 'COMPRA_TARJETA', 45.50, 'PEN', 'Pago en Rústica Centro de Lima', 'VOUCH-882910', '2026-07-03 22:07:09'),
+(2, 'EMPRESA-NOMINA', '191-72345-0-01', 'ABONO_HABERES', 3500.00, 'PEN', 'Abono de Planilla BCP', 'VOUCH-102938', '2026-07-03 22:07:09');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `servicios_publicos`
+-- Estructura de tabla para la tabla `inversiones_seguros`
 --
 
-CREATE TABLE `servicios_publicos` (
-  `id_servicio` varchar(50) NOT NULL,
-  `empresa` varchar(100) NOT NULL,
-  `categoria` varchar(50) NOT NULL,
-  `codigo_suministro` varchar(50) NOT NULL,
-  `monto_deuda` decimal(10,2) NOT NULL
+CREATE TABLE `inversiones_seguros` (
+  `id_producto` varchar(20) NOT NULL,
+  `dni_cliente` varchar(8) DEFAULT NULL,
+  `tipo_producto` varchar(40) DEFAULT NULL,
+  `monto_invertido_prima` decimal(12,2) NOT NULL,
+  `rentabilidad_acumulada` decimal(10,2) DEFAULT 0.00,
+  `estado` varchar(20) DEFAULT 'ACTIVO'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Volcado de datos para la tabla `servicios_publicos`
+-- Estructura de tabla para la tabla `prestamos`
 --
 
-INSERT INTO `servicios_publicos` (`id_servicio`, `empresa`, `categoria`, `codigo_suministro`, `monto_deuda`) VALUES
-('SERV-AGUA', 'SEDAPAL', 'AGUA', '7463521', 42.10),
-('SERV-LUZ', 'LUZ DEL SUR', 'LUZ', '1029384', 156.40),
-('SERV-TEL', 'CLARO POSTPAGO', 'TELEFONIA', '999888777', 79.90),
-('SERV-UNI', 'UNIVERSIDAD TECNOLOGICA DEL PERU', 'EDUCACION', 'U20261011', 890.00);
+CREATE TABLE `prestamos` (
+  `id_prestamo` varchar(20) NOT NULL,
+  `dni_cliente` varchar(8) DEFAULT NULL,
+  `monto_capital` decimal(12,2) NOT NULL,
+  `cuotas_totales` int(11) NOT NULL,
+  `cuotas_pagadas` int(11) DEFAULT 0,
+  `monto_cuota` decimal(10,2) NOT NULL,
+  `estado` varchar(20) DEFAULT 'VIGENTE'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -145,43 +132,39 @@ INSERT INTO `servicios_publicos` (`id_servicio`, `empresa`, `categoria`, `codigo
 --
 
 CREATE TABLE `simulaciones_credito` (
-  `id_solicitud` varchar(50) NOT NULL,
-  `monto_solicitado` decimal(10,2) NOT NULL,
+  `id_solicitud` varchar(20) NOT NULL,
+  `monto_solicitado` decimal(12,2) NOT NULL,
   `cuotas_pactadas` int(11) NOT NULL,
   `tcea_aplicada` decimal(5,2) NOT NULL,
   `monto_cuota` decimal(10,2) NOT NULL,
-  `estado_solicitud` varchar(50) DEFAULT 'SIMULADO_ONLINE'
+  `estado_solicitud` varchar(30) DEFAULT 'SIMULADO_ONLINE'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `simulaciones_credito`
---
-
-INSERT INTO `simulaciones_credito` (`id_solicitud`, `monto_solicitado`, `cuotas_pactadas`, `tcea_aplicada`, `monto_cuota`, `estado_solicitud`) VALUES
-('PREST-CAMP-TEST', 3000.00, 12, 45.50, 280.00, 'DESEMBOLSADO');
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `tarjetas_config`
+-- Estructura de tabla para la tabla `tarjetas`
 --
 
-CREATE TABLE `tarjetas_config` (
-  `id_tarjeta` varchar(50) NOT NULL,
-  `cuenta_id` varchar(50) DEFAULT NULL,
-  `pin_cajero` varchar(4) NOT NULL,
-  `compras_internet` tinyint(1) DEFAULT 0,
-  `compras_extranjero` tinyint(1) DEFAULT 0,
-  `cvv_estatico` varchar(3) NOT NULL
+CREATE TABLE `tarjetas` (
+  `id_tarjeta` varchar(16) NOT NULL,
+  `cuenta_id` varchar(20) DEFAULT NULL,
+  `tipo_tarjeta` varchar(20) DEFAULT NULL,
+  `linea_credito_total` decimal(12,2) DEFAULT 0.00,
+  `linea_credito_disponible` decimal(12,2) DEFAULT 0.00,
+  `deuda_fecha_total` decimal(12,2) DEFAULT 0.00,
+  `deuda_fecha_minima` decimal(12,2) DEFAULT 0.00,
+  `fecha_vencimiento` date DEFAULT NULL,
+  `pin_cajero` varchar(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `tarjetas_config`
+-- Volcado de datos para la tabla `tarjetas`
 --
 
-INSERT INTO `tarjetas_config` (`id_tarjeta`, `cuenta_id`, `pin_cajero`, `compras_internet`, `compras_extranjero`, `cvv_estatico`) VALUES
-('4551-2300-0010-1111', 'CTA-101', '4321', 1, 0, '482'),
-('4557-8812-3394-3920', 'CTA-102', '9876', 1, 1, '109');
+INSERT INTO `tarjetas` (`id_tarjeta`, `cuenta_id`, `tipo_tarjeta`, `linea_credito_total`, `linea_credito_disponible`, `deuda_fecha_total`, `deuda_fecha_minima`, `fecha_vencimiento`, `pin_cajero`) VALUES
+('4551230000101111', '191-72345-0-01', 'DEBITO', 0.00, 0.00, 0.00, 0.00, '2030-12-31', '4321'),
+('5221880099204444', '191-72345-0-01', 'CREDITO_VISA', 10000.00, 8500.00, 1500.00, 120.00, '2029-05-15', '9876');
 
 -- --------------------------------------------------------
 
@@ -192,54 +175,61 @@ INSERT INTO `tarjetas_config` (`id_tarjeta`, `cuenta_id`, `pin_cajero`, `compras
 CREATE TABLE `usuarios` (
   `dni` varchar(8) NOT NULL,
   `numero_tarjeta` varchar(16) NOT NULL,
-  `clave` varchar(6) NOT NULL,
+  `clave_internet` varchar(6) NOT NULL,
   `nombre` varchar(100) NOT NULL,
-  `tipo_perfil` varchar(20) DEFAULT 'CLIENTE_NATURAL'
+  `correo` varchar(100) NOT NULL,
+  `telefono` varchar(9) NOT NULL,
+  `dispositivo_vinculado` varchar(100) DEFAULT 'Desconocido',
+  `token_digital_seed` varchar(64) NOT NULL,
+  `otp_actual` varchar(6) DEFAULT NULL,
+  `perfil` varchar(20) DEFAULT 'NATURAL_REGULAR'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`dni`, `numero_tarjeta`, `clave`, `nombre`, `tipo_perfil`) VALUES
-('40556677', '4557881233943', '654321', 'PEDRO RAMIREZ CASAS', 'CLIENTE_NATURAL'),
-('72345678', '4551230000101', '123456', 'JUAN ALEXIS ULLOA TORRES', 'CLIENTE_VIP');
+INSERT INTO `usuarios` (`dni`, `numero_tarjeta`, `clave_internet`, `nombre`, `correo`, `telefono`, `dispositivo_vinculado`, `token_digital_seed`, `otp_actual`, `perfil`) VALUES
+('72345678', '4551230000101111', '123456', 'JUAN ALEXIS ULLOA TORRES', 'juan.ulloa@bcp.com.pe', '999888777', 'iPhone 15 Pro de Juan', 'SEED_OAUTH_BCP_9921', '123456', 'VIP');
 
 --
 -- Índices para tablas volcadas
 --
 
 --
--- Indices de la tabla `auditoria_accesos`
---
-ALTER TABLE `auditoria_accesos`
-  ADD PRIMARY KEY (`id_auditoria`);
-
---
--- Indices de la tabla `compras_tarjeta`
---
-ALTER TABLE `compras_tarjeta`
-  ADD PRIMARY KEY (`id_compra`),
-  ADD KEY `tarjeta_id` (`tarjeta_id`);
-
---
 -- Indices de la tabla `cuentas`
 --
 ALTER TABLE `cuentas`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `cci` (`cci`),
+  ADD KEY `dni_titular` (`dni_titular`);
 
 --
--- Indices de la tabla `historial_movimientos`
+-- Indices de la tabla `empresas_afiliadas`
 --
-ALTER TABLE `historial_movimientos`
-  ADD PRIMARY KEY (`id_movimiento`),
-  ADD KEY `cuenta_id` (`cuenta_id`);
+ALTER TABLE `empresas_afiliadas`
+  ADD PRIMARY KEY (`id_empresa`);
 
 --
--- Indices de la tabla `servicios_publicos`
+-- Indices de la tabla `historial_transacciones`
 --
-ALTER TABLE `servicios_publicos`
-  ADD PRIMARY KEY (`id_servicio`);
+ALTER TABLE `historial_transacciones`
+  ADD PRIMARY KEY (`id_tx`),
+  ADD UNIQUE KEY `comprobante_id` (`comprobante_id`);
+
+--
+-- Indices de la tabla `inversiones_seguros`
+--
+ALTER TABLE `inversiones_seguros`
+  ADD PRIMARY KEY (`id_producto`),
+  ADD KEY `dni_cliente` (`dni_cliente`);
+
+--
+-- Indices de la tabla `prestamos`
+--
+ALTER TABLE `prestamos`
+  ADD PRIMARY KEY (`id_prestamo`),
+  ADD KEY `dni_cliente` (`dni_cliente`);
 
 --
 -- Indices de la tabla `simulaciones_credito`
@@ -248,9 +238,9 @@ ALTER TABLE `simulaciones_credito`
   ADD PRIMARY KEY (`id_solicitud`);
 
 --
--- Indices de la tabla `tarjetas_config`
+-- Indices de la tabla `tarjetas`
 --
-ALTER TABLE `tarjetas_config`
+ALTER TABLE `tarjetas`
   ADD PRIMARY KEY (`id_tarjeta`),
   ADD KEY `cuenta_id` (`cuenta_id`);
 
@@ -266,38 +256,38 @@ ALTER TABLE `usuarios`
 --
 
 --
--- AUTO_INCREMENT de la tabla `auditoria_accesos`
+-- AUTO_INCREMENT de la tabla `historial_transacciones`
 --
-ALTER TABLE `auditoria_accesos`
-  MODIFY `id_auditoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT de la tabla `historial_movimientos`
---
-ALTER TABLE `historial_movimientos`
-  MODIFY `id_movimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+ALTER TABLE `historial_transacciones`
+  MODIFY `id_tx` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
 --
 
 --
--- Filtros para la tabla `compras_tarjeta`
+-- Filtros para la tabla `cuentas`
 --
-ALTER TABLE `compras_tarjeta`
-  ADD CONSTRAINT `compras_tarjeta_ibfk_1` FOREIGN KEY (`tarjeta_id`) REFERENCES `tarjetas_config` (`id_tarjeta`) ON DELETE CASCADE;
+ALTER TABLE `cuentas`
+  ADD CONSTRAINT `cuentas_ibfk_1` FOREIGN KEY (`dni_titular`) REFERENCES `usuarios` (`dni`) ON DELETE CASCADE;
 
 --
--- Filtros para la tabla `historial_movimientos`
+-- Filtros para la tabla `inversiones_seguros`
 --
-ALTER TABLE `historial_movimientos`
-  ADD CONSTRAINT `historial_movimientos_ibfk_1` FOREIGN KEY (`cuenta_id`) REFERENCES `cuentas` (`id`) ON DELETE CASCADE;
+ALTER TABLE `inversiones_seguros`
+  ADD CONSTRAINT `inversiones_seguros_ibfk_1` FOREIGN KEY (`dni_cliente`) REFERENCES `usuarios` (`dni`) ON DELETE CASCADE;
 
 --
--- Filtros para la tabla `tarjetas_config`
+-- Filtros para la tabla `prestamos`
 --
-ALTER TABLE `tarjetas_config`
-  ADD CONSTRAINT `tarjetas_config_ibfk_1` FOREIGN KEY (`cuenta_id`) REFERENCES `cuentas` (`id`) ON DELETE CASCADE;
+ALTER TABLE `prestamos`
+  ADD CONSTRAINT `prestamos_ibfk_1` FOREIGN KEY (`dni_cliente`) REFERENCES `usuarios` (`dni`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `tarjetas`
+--
+ALTER TABLE `tarjetas`
+  ADD CONSTRAINT `tarjetas_ibfk_1` FOREIGN KEY (`cuenta_id`) REFERENCES `cuentas` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

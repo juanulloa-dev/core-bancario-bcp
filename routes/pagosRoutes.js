@@ -1,7 +1,2 @@
-const express = require("express");
-const router = express.Router();
-const pagosController = require("../controllers/pagosController");
-
-router.post("/pagos/servicios", pagosController.pagarServicios);
-router.post("/tarjetas/pasar-a-cuotas", pagosController.cuotificarCompras);
-module.exports = router;
+const r = require("express").Router(); const c = require("../controllers/pagosController");
+r.post("/servicios", c.pagoServiciosPublicos); r.post("/recargas", c.recargasCelularOperadoras); r.post("/tarjeta/bcp", c.pagoTarjetaCreditoBCP); r.post("/tarjeta/otros", c.pagoTarjetaOtrosBancos); module.exports = r;

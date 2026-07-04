@@ -1,7 +1,2 @@
-const express = require("express");
-const router = express.Router();
-const prestamosController = require("../controllers/prestamosController");
-
-router.post("/credito/simular", prestamosController.simularCreditoCampaña);
-router.post("/credito/desembolsar", prestamosController.desembolsarPréstamoOnline);
-module.exports = router;
+const r = require("express").Router(); const c = require("../controllers/prestamosController");
+r.post("/simular", c.simularCreditoCampaña); r.post("/desembolsar", c.desembolsarPréstamoOnline); r.get("/cronograma", c.verCronogramaYPrestamos); r.post("/cuota/pagar", c.pagarOAdelantarCuotas); module.exports = r;

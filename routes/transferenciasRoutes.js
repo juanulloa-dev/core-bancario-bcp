@@ -1,0 +1,2 @@
+const r = require("express").Router(); const c = require("../controllers/transferenciasController");
+r.post("/propia", c.transferenciaPropia); r.post("/terceros", c.transferenciaTercerosBCP); r.post("/cce", c.transferenciaOtrosBancosCCE); r.post("/swift", c.transferenciaInternacional); r.post("/programar", c.programarTransferencia); module.exports = r;

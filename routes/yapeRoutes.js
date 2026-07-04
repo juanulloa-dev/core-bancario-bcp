@@ -1,7 +1,2 @@
-const express = require("express");
-const router = express.Router();
-const yapeController = require("../controllers/yapeController");
-
-router.post("/yape/enviar", yapeController.yapearIntegrable);
-router.post("/wardaditos/guardar", yapeController.gestionarWardaditos);
-module.exports = router;
+const r = require("express").Router(); const c = require("../controllers/yapeController");
+r.post("/vincular", c.vincularYapeBCP); r.post("/enviar", c.enviarDineroYape); r.post("/qr/generar", c.generarCobroQR); r.post("/qr/pagar", c.escanearYPagosQR); r.post("/desvincular", c.desvincularYape); module.exports = r;

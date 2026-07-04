@@ -1,11 +1,8 @@
 const pool = require("../config/db");
 const yapeModel = {
-  operarWardaditos: async (cuentaId, monto, operacion) => {
-    if (operacion === "GUARDAR") {
-      await pool.query("UPDATE cuentas SET saldo_disponible = saldo_disponible - ?, saldo_wawaditos = saldo_wawaditos + ? WHERE id = ?", [monto, monto, cuentaId]);
-    } else {
-      await pool.query("UPDATE cuentas SET saldo_disponible = saldo_disponible + ?, saldo_wawaditos = saldo_wawaditos - ? WHERE id = ?", [monto, monto, cuentaId]);
-    }
+  buscarPorCelular: async (celular) => {
+    const [rows] = await pool.query("SELECT id FROM cuentas WHERE dni_titular = (SELECT dni FROM usuarios WHERE telefono = ?)", [celular]);
+    return rows[0] || null;
   }
 };
 module.exports = yapeModel;
