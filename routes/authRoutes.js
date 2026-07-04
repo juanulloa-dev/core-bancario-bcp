@@ -1,2 +1,10 @@
-const r = require("express").Router(); const c = require("../controllers/authController");
-r.post("/login", c.login); r.post("/otp/verificar", c.verificarOTP); r.post("/dispositivo/vincular", c.reconocerDispositivo); r.post("/acceso/recuperar", c.recuperarAcceso); r.post("/logout", c.logout); module.exports = r;
+const r = require("express").Router(); 
+const c = require("../controllers/authController");
+
+r.post("/login", c.login); 
+r.post("/otp/verificar", c.verificarOTP); 
+r.post("/dispositivo/vincular", c.reconocerDispositivo); 
+r.post("/acceso/recuperar", c.recuperarAcceso); 
+r.post("/logout", c.logout); 
+
+module.exports = r;

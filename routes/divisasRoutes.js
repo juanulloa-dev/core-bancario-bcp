@@ -1,2 +1,8 @@
-const r = require("express").Router(); const c = require("../controllers/divisasController");
-r.post("/simular", c.simuladorTipoCambio); r.post("/comprar", c.comprarDolares); r.post("/vender", c.venderDolares); module.exports = r;
+const r = require("express").Router(); 
+const c = require("../controllers/divisasController");
+
+r.post("/simular", c.simuladorTipoCambio); 
+r.post("/comprar", c.comprarDolares); 
+r.post("/vender", c.venderDolares); 
+
+module.exports = r;
