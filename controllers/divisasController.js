@@ -28,6 +28,21 @@ const divisasController = {
       const v = await txModel.registrarComprobante(cuentaDolares, cuentaSoles, "DIVISAS_VENTA", montoDolares, `Venta de $ ${montoDolares} recibiendo S/. ${solesAEntregar.toFixed(2)}`);
       res.status(200).json({ status: "CAMBIO_DIVISAS_COMPLETO", solesEntregados: parseFloat(solesAEntregar.toFixed(2)), comprobante: v });
     } catch (e) { res.status(400).json({ error: e.message }); }
+  },
+  // Añadir en el backend para validar la cuenta del tercero
+  verificarCuentaTercero: async (req, res) => {
+    try {
+      const { numeroCuenta } = req.query;
+      const [rows] = await pool.query(
+        "SELECT id, tipo_cuenta, id_usuario FROM cuentas WHERE id = ?", 
+        [numeroCuenta]
+      );
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "La cuenta ingresada no existe en el págulo del BCP." });
+      }
+      res.status(200).json({ existe: true, cuenta: rows[0] });
+    } catch (e) { res.status(500).json({ error: e.message }); }
   }
+
 };
 module.exports = divisasController;

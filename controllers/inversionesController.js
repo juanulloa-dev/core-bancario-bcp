@@ -13,7 +13,7 @@ const inversionesController = {
   },
   suscribirFondosMutuos: async (req, res) => {
     try {
-      const { dni, cuentaId, monto, tipoFondo } = req.body; // Crecimiento, Conservador
+      const { dni, cuentaId, monto, tipoFondo } = req.body; 
       await txModel.verificarYDescontar(cuentaId, monto);
       const idInv = "INV-FM-" + Math.floor(100000 + Math.random() * 900000);
       await invModel.crearInversionSeguro(idInv, dni, `FONDO_MUTUO_${tipoFondo}`, monto);
@@ -22,7 +22,7 @@ const inversionesController = {
   },
   contratarSegurosYRenovacion: async (req, res) => {
     try {
-      const { dni, cuentaId, primaMonto, tipoSeguro } = req.body; // SOAT, Seguro de Vida
+      const { dni, cuentaId, primaMonto, tipoSeguro } = req.body;
       await txModel.verificarYDescontar(cuentaId, primaMonto);
       const idSeg = "SEG-" + Math.floor(100000 + Math.random() * 900000);
       await invModel.crearInversionSeguro(idSeg, dni, tipoSeguro, primaMonto);

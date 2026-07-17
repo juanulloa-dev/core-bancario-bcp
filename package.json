@@ -10,6 +10,7 @@
     "call-bind-apply-helpers": "^1.0.2",
     "call-bound": "^1.0.4",
     "cookie-signature": "^1.2.2",
+    "cors": "^2.8.6",
     "depd": "^2.0.0",
     "dunder-proto": "^1.0.1",
     "ee-first": "^1.1.1",

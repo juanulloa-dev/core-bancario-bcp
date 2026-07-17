@@ -1,6 +1,8 @@
+const cors = require("cors");
 const express = require("express");
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.use("/api/bcp/auth", require("./routes/authRoutes"));
 app.use("/api/bcp/cuentas", require("./routes/cuentasRoutes"));
@@ -13,6 +15,6 @@ app.use("/api/bcp/inversiones", require("./routes/inversionesRoutes"));
 
 app.listen(3000, () => {
   console.log("====================================================");
-  console.log(" 🚀 CORE SYSTEM BCP CORPORATIVO UP: PUERTO 3000");
+  console.log("CORE SYSTEM BCP");
   console.log("====================================================");
 }); 
