@@ -4,7 +4,9 @@ const authController = {
     try {
       const { numero_tarjeta, clave_internet } = req.body;
       const user = await authModel.buscarUsuario(numero_tarjeta);
-      if (!user || user.clave_internet !== clave_internet) return res.status(401).json({ msg: "Credenciales inválidas" });
+      if (!user || String(user.clave) !== String(clave_internet)) {
+  return res.status(401).json({ msg: "Credenciales inválidas" });
+}
       res.status(200).json({ msg: "Paso 1 exitoso", dni: user.dni, tokenDigitalSeed: user.token_digital_seed });
     } catch (e) { res.status(500).json({ error: e.message }); }
   },
